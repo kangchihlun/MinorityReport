@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-import "./SafeMath.sol";
+import "./lib/SafeMath.sol";
 
 contract PlayerBookV2 {
     using SafeMath for uint256;

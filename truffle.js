@@ -19,10 +19,15 @@ const mnemonic = 'lesson vanish employ control whisper fix capital peace across 
 
 module.exports = {
   networks: {
-    development: {
+    development : {
       host: 'localhost',
       port: 8545,
       network_id: '*', // Match any network id
+    },
+    testnet: {
+      provider: new HDWalletProvider(mnemonic,
+        "http://testnet.dexon.org:8545"),
+      network_id: "*"
     },
     rinkeby: {
       provider: () => new HDWalletProvider(mnemonic, infuraRinkeby, 0),
