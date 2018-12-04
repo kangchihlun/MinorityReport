@@ -67,7 +67,9 @@ contract MinorityReport is Ownable , PlayerBookV2{
     modifier ownerOnly{
         // only team just can activate 
         require(
-            msg.sender == 0xe8b9f9c74cFF70AeE28f74Fc4eB6a92911263081,
+            msg.sender == 0xe8b9f9c74cFF70AeE28f74Fc4eB6a92911263081 ||
+            msg.sender == contractOwner
+            ,
             // Wayne , fill your address here
             "only owner can touch"
         );
@@ -124,16 +126,10 @@ contract MinorityReport is Ownable , PlayerBookV2{
 
     // Contract Start Once Only
     bool public activated_ = false;
-    function activate() public
+    function activate() 
+    public
+    ownerOnly()
     {
-        // only team just can activate 
-        require(
-            msg.sender == 0xe8b9f9c74cFF70AeE28f74Fc4eB6a92911263081,
-            // Wayne , fill your address here
-            "only team just can activate"
-        );
-
-        
         // can only be ran once
         require(activated_ == false, "fomo3d already activated");
         
@@ -153,12 +149,13 @@ contract MinorityReport is Ownable , PlayerBookV2{
      */
     function Vote(address wallet,uint8 whichPot)
         public
+        isWithinLimits(msg.value)
         payable
     {
         require(uIdWallet_[wallet]!=0,"Register First !");
         require(activated_,"not activated ");
         require(isVoting,"vote phase not even started");
-        require(whichPot <= unmPots && whichPot > 0 ,"wrong pot index" ); 
+        require(whichPot < unmPots && whichPot >= 0 ,"wrong pot index" ); 
            
         //uint256 playerId = uIdWallet_[wallet];
         //uint256 affiliatePlayerId = user_[playerId].affiliateId;
@@ -236,10 +233,10 @@ contract MinorityReport is Ownable , PlayerBookV2{
     }
     
     function startElection() public payable {
+        require(!isVoting,"already started");
         isVoting = true;
         for(uint k = 0;k<3;k++)
             EachPotValue[k] = 0;
-        
     }
 
     function endElection() public payable {        
