@@ -105,7 +105,7 @@ contract MinorityReport is Ownable , PlayerBookV2{
     //==================================
     event OnVoteStart(uint round);
     event OnElected(uint round,uint whichPot);
-    event OnVoteToPot(uint8 whichPot,address whoVoted);
+    event OnVoteToPot(uint8 whichPot,address whoVoted,uint256 value);
     event OnMinorityPotID_Changed(uint8 whichPot,uint256 amount);
 
     constructor (address _addr) public{
@@ -121,7 +121,7 @@ contract MinorityReport is Ownable , PlayerBookV2{
     isActivated() 
     isWithinLimits(msg.value)
     payable{
-        Vote(msg.sender,1);
+        Vote(1);
     }
 
     // Contract Start Once Only
@@ -138,21 +138,21 @@ contract MinorityReport is Ownable , PlayerBookV2{
         
         // lets start first round
         rID_ = 1;
-        round_[1].strt = now + rndExtra_ - rndGap_;
-        round_[1].end = now + rndExtra_;
-
+        round_[rID_].strt = now;
+        round_[rID_].end = now.add(rndGap_);
+        
         startElection();
     }
 
     /**
      *     Core Function
      */
-    function Vote(address wallet,uint8 whichPot)
+    function Vote(uint8 whichPot)
         public
         isWithinLimits(msg.value)
         payable
     {
-        require(uIdWallet_[wallet]!=0,"Register First !");
+        //require(uIdWallet_[wallet]!=0,"Register First !");
         require(activated_,"not activated ");
         require(isVoting,"vote phase not even started");
         require(whichPot < unmPots && whichPot >= 0 ,"wrong pot index" ); 
@@ -168,37 +168,34 @@ contract MinorityReport is Ownable , PlayerBookV2{
         uint256 _now = now;
         
         // if round is active
-        if ( _now > round_[_rID].strt && (_now <= round_[_rID].end) ) 
+        if ( _now >= round_[_rID].strt && (_now <= round_[_rID].end) ) 
         {
-            uint256 oneDex = 1000000000000;
-            if (msg.value > oneDex/1000)
-            {    
-                // [ NOT OPEN YET ] calc value based on time remain
-                /*
-                uint256 timeMulRatio = 1000000000000;
-                uint256 timeLeft = _now - round_[_rID].end;
-                timeLeft = SafeMath.mul(timeLeft,timeMulRatio);
-                uint256 gameDuration = Math.max( round_[_rID].end - round_[_rID].start , 1);
-                gameDuration = SafeMath.mul(gameDuration,timeMulRatio);
-                uint256 timeLeftFraction = SafeMath.div(timeLeft,gameDuration);
-                uint256 timeLeftFraction_inv = timeMulRatio - timeLeftFraction;
-                uint256 availableKeys = msg.value / oneDex + SafeMath.div(timeLeftFraction_inv,timeMulRatio)
-                */
-                EachPotValue[whichPot] += msg.value;
+            // [ NOT OPEN YET ] calc value based on time remain
+            /*
+            uint256 timeMulRatio = 1000000000000;
+            uint256 timeLeft = _now - round_[_rID].end;
+            timeLeft = SafeMath.mul(timeLeft,timeMulRatio);
+            uint256 gameDuration = Math.max( round_[_rID].end - round_[_rID].start , 1);
+            gameDuration = SafeMath.mul(gameDuration,timeMulRatio);
+            uint256 timeLeftFraction = SafeMath.div(timeLeft,gameDuration);
+            uint256 timeLeftFraction_inv = timeMulRatio - timeLeftFraction;
+            uint256 availableKeys = msg.value / oneDex + SafeMath.div(timeLeftFraction_inv,timeMulRatio)
+            */
+            EachPotValue[whichPot] += msg.value;
 
-                // insert temp address list of voters 
-                if( (VoteHistory[_rID][msg.sender][0]==0)&&
-                    (VoteHistory[_rID][msg.sender][1]==0)&&
-                    (VoteHistory[_rID][msg.sender][2]==0)
-                  ){
-                    tempVoterArr.push(msg.sender);
-                }
-
-                VoteHistory[_rID][msg.sender][whichPot] += msg.value;
-                // compare the lowest 
-                lowestPotIdx = compareLowest();
+            // insert temp address list of voters 
+            if( (VoteHistory[_rID][msg.sender][0]==0)&&
+                (VoteHistory[_rID][msg.sender][1]==0)&&
+                (VoteHistory[_rID][msg.sender][2]==0)
+              ){
+                tempVoterArr.push(msg.sender);
             }
-            emit OnVoteToPot(whichPot,msg.sender);
+
+            VoteHistory[_rID][msg.sender][whichPot] += msg.value;
+            // compare the lowest 
+            lowestPotIdx = compareLowest();
+        
+            emit OnVoteToPot(whichPot,msg.sender,msg.value);
         }
 
     }
@@ -252,7 +249,7 @@ contract MinorityReport is Ownable , PlayerBookV2{
         // start next round
         rID_++;
         round_[rID_].strt = now;
-        round_[rID_].end = now.add(rndInit_).add(rndGap_);
+        round_[rID_].end = now.add(rndGap_);
         
 
         // Clear Data
