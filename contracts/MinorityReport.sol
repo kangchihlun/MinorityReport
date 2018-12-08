@@ -211,14 +211,15 @@ contract MinorityReport is Ownable , PlayerBookV2{
         for(uint8 k = 0;k < 3;k++){
             if(EachPotValue[k]<=lowestValue){
                 lowestValue = EachPotValue[k];
-                lowestPotIdxArr[k]=k;
+                lowestPotIdxArr[k] = k;
                 numSameValue++;
             }
         }
         // if any of each pot has same amount
         // Use Dexon's Rand choose one as final index
         if(numSameValue>1){
-            //lowestPotIdx = rand % lowestPotIdxArr.length;
+            uint res = rand % lowestPotIdxArr.length;
+            lowestPotIdx = lowestPotIdxArr[res]; 
         }
         else if (numSameValue == 1){
             lowestPotIdx = lowestPotIdxArr[0];
