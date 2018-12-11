@@ -6,12 +6,20 @@ pragma solidity ^0.4.24;
     Last Modified date : 2018/12/2 
  */
 
-import "./lib/Ownable.sol";
-import "./PlayerBookV2.sol";
-import "./lib/SafeMath.sol";
-import "./lib/Math.sol";
-contract MinorityReport is Ownable , PlayerBookV2{
+import "./PlayerGameV2.sol";
+import "./SafeMath.sol";
+import "./Math.sol";
 
+
+interface PlayerBookInterface {
+function getUserNameByAddress(address _addr) external view returns(bytes32);
+function getUserIdByAddress(address _addr) external view returns(uint256);
+function deposit(address _addr) external payable returns(bool);
+}
+
+contract MinorityReport {
+    address constant playbookContractAddress_ = 0x2c8e17013d0b76f7AA3976d64f9666592f4cf57d;
+    PlayerBookInterface constant private PlayerBook = PlayerBookInterface(playbookContractAddress_);
     struct Round {  
         uint256 end;    // time ends/ended
         bool ended;     // has round end function been ran
@@ -138,8 +146,8 @@ contract MinorityReport is Ownable , PlayerBookV2{
         
         // lets start first round
         rID_ = 1;
-        round_[rID_].strt = now;
-        round_[rID_].end = now.add(rndGap_);
+        round_[rID_].strt = block.timestamp;
+        round_[rID_].end = block.timestamp + rndGap_;
         
         startElection();
     }
@@ -218,8 +226,8 @@ contract MinorityReport is Ownable , PlayerBookV2{
         // if any of each pot has same amount
         // Use Dexon's Rand choose one as final index
         if(numSameValue>1){
-            uint res = rand % lowestPotIdxArr.length;
-            lowestPotIdx = lowestPotIdxArr[res]; 
+            //uint res = rand % lowestPotIdxArr.length;
+            //lowestPotIdx = lowestPotIdxArr[res]; 
         }
         else if (numSameValue == 1){
             lowestPotIdx = lowestPotIdxArr[0];
@@ -250,7 +258,7 @@ contract MinorityReport is Ownable , PlayerBookV2{
         // start next round
         rID_++;
         round_[rID_].strt = now;
-        round_[rID_].end = now.add(rndGap_);
+        round_[rID_].end = now + (rndGap_);
         
 
         // Clear Data
@@ -277,9 +285,9 @@ contract MinorityReport is Ownable , PlayerBookV2{
         
         if (_now < round_[_rID].end)
             if (_now > round_[_rID].strt + rndGap_)
-                return( (round_[_rID].end).sub(_now) );
+                return( (round_[_rID].end) - (_now) );
             else
-                return( (round_[_rID].strt + rndGap_).sub(_now) );
+                return( (round_[_rID].strt + rndGap_) - (_now) );
         else
             return(0);
     }

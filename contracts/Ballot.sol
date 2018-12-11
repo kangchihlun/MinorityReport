@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-import "./lib/SafeMath.sol";
+import "./SafeMath.sol";
 
 contract PlayerBookEvents {
     event onNewUser

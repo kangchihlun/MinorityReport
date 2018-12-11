@@ -14,7 +14,6 @@
     "compile": "node_modules/.bin/truffle compile"
   },
   "dependencies": {
-    "bcrypt": "^3.0.2",
     "solc": "github:dexon-foundation/dsolc-js#v0.4.25",
     "truffle": "^4.1.14",
     "truffle-hdwallet-provider": "0.0.6"
