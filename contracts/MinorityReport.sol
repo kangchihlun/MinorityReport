@@ -6,18 +6,12 @@ pragma solidity ^0.4.24;
     Last Modified date : 2018/12/2 
  */
 
-import "./PlayerGameV2.sol";
 import "./SafeMath.sol";
+import "./PlayerGameV2.sol";
 import "./Math.sol";
 
-
-interface PlayerBookInterface {
-function getUserNameByAddress(address _addr) external view returns(bytes32);
-function getUserIdByAddress(address _addr) external view returns(uint256);
-function deposit(address _addr) external payable returns(bool);
-}
-
 contract MinorityReport {
+    using SafeMath for uint256;
     // address constant playbookContractAddress_ = 0x2c8e17013d0b76f7AA3976d64f9666592f4cf57d;
     // PlayerBookInterface constant private PlayerBook = PlayerBookInterface(playbookContractAddress_);
     struct Round {  
@@ -102,206 +96,222 @@ contract MinorityReport {
     // //==================================
     // //    Events
     // //==================================
-    // event OnVoteStart(uint round);
-    // event OnElected(uint round,uint whichPot);
-    // event OnVoteToPot(uint8 whichPot,address whoVoted,uint256 value);
-    // event OnMinorityPotID_Changed(uint8 whichPot,uint256 amount);
+    event OnVoteStart(uint round);
+    event OnElected(uint round,uint whichPot);
+    event OnVoteToPot(uint8 whichPot,address whoVoted,uint256 value);
+    event OnMinorityPotID_Changed(uint8 whichPot,uint256 amount);
 
-    // constructor (address _addr) public{
-    //     require(_addr != address(0),"owner created");
-    //     contractOwner = _addr;
+    // constructor () public{
+    //     require(msg.sender != address(0),"owner created");
+    //     contractOwner = msg.sender;
     // }
+    constructor (address _addr) public{
+        require(_addr != address(0),"owner created");
+        contractOwner = _addr;
+    }
 
 
-
-    // //Fallback setup forward
-    // function()
-    // public
-    // isActivated() 
-    // isWithinLimits(msg.value)
-    // payable{
-    //     Vote(1);
-    // }
+    //Fallback setup forward
+    function()
+    public
+    isActivated() 
+    isWithinLimits(msg.value)
+    payable{
+        Vote(1);
+    }
 
     // // Contract Start Once Only
     bool public activated_ = false;
-    // function activate() 
-    // public
-    // ownerOnly()
-    // {
-    //     // can only be ran once
-    //     require(activated_ == false, "fomo3d already activated");
+    function activate() 
+    public
+    ownerOnly()
+    {
+        // can only be ran once
+        require(activated_ == false, "Minority Report already activated");
         
-    //     // activate the contract 
-    //     activated_ = true;
+        // activate the contract 
+        activated_ = true;
         
-    //     // lets start first round
-    //     rID_ = 1;
-    //     round_[rID_].strt = block.timestamp;
-    //     round_[rID_].end = block.timestamp + rndGap_;
+        // lets start first round
+        rID_ = 1;
+        round_[rID_].strt = block.timestamp;
+        round_[rID_].end = block.timestamp + rndGap_;
         
-    //     startElection();
-    // }
+        startElection();
+    }
 
-    // /**
-    //  *     Core Function
-    //  */
-    // function Vote(uint8 whichPot)
-    //     public
-    //     isWithinLimits(msg.value)
-    //     payable
-    // {
-    //     //require(uIdWallet_[wallet]!=0,"Register First !");
-    //     require(activated_,"not activated ");
-    //     require(isVoting,"vote phase not even started");
-    //     require(whichPot < unmPots && whichPot >= 0 ,"wrong pot index" ); 
+    /**
+     *     Core Function
+     */
+    function Vote(uint8 whichPot)
+        public
+        isWithinLimits(msg.value)
+        payable
+    {
+        //require(uIdWallet_[wallet]!=0,"Register First !");
+        require(activated_,"not activated ");
+        require(isVoting,"vote phase not even started");
+        require(whichPot < unmPots && whichPot >= 0 ,"wrong pot index" ); 
            
-    //     //uint256 playerId = uIdWallet_[wallet];
-    //     //uint256 affiliatePlayerId = user_[playerId].affiliateId;
-    //     //uint256 affiliateAffiliatePlayerId = user_[affiliatePlayerId].affiliateId;
+        //uint256 playerId = uIdWallet_[wallet];
+        //uint256 affiliatePlayerId = user_[playerId].affiliateId;
+        //uint256 affiliateAffiliatePlayerId = user_[affiliatePlayerId].affiliateId;
 
-    //     // setup local rID
-    //     uint256 _rID = rID_;
+        // setup local rID
+        uint256 _rID = rID_;
         
-    //     // grab time
-    //     uint256 _now = now;
+        // grab time
+        uint256 _now = now;
         
-    //     // if round is active
-    //     if ( _now >= round_[_rID].strt && (_now <= round_[_rID].end) ) 
-    //     {
-    //         // [ NOT OPEN YET ] calc value based on time remain
-    //         /*
-    //         uint256 timeMulRatio = 1000000000000;
-    //         uint256 timeLeft = _now - round_[_rID].end;
-    //         timeLeft = SafeMath.mul(timeLeft,timeMulRatio);
-    //         uint256 gameDuration = Math.max( round_[_rID].end - round_[_rID].start , 1);
-    //         gameDuration = SafeMath.mul(gameDuration,timeMulRatio);
-    //         uint256 timeLeftFraction = SafeMath.div(timeLeft,gameDuration);
-    //         uint256 timeLeftFraction_inv = timeMulRatio - timeLeftFraction;
-    //         uint256 availableKeys = msg.value / oneDex + SafeMath.div(timeLeftFraction_inv,timeMulRatio)
-    //         */
-    //         EachPotValue[whichPot] += msg.value;
+        // if round is active
+        if ( _now >= round_[_rID].strt && (_now <= round_[_rID].end) ) 
+        {
+            // [ NOT OPEN YET ] calc value based on time remain
+            /*
+            uint256 timeMulRatio = 1000000000000;
+            uint256 timeLeft = _now - round_[_rID].end;
+            timeLeft = SafeMath.mul(timeLeft,timeMulRatio);
+            uint256 gameDuration = Math.max( round_[_rID].end - round_[_rID].start , 1);
+            gameDuration = SafeMath.mul(gameDuration,timeMulRatio);
+            uint256 timeLeftFraction = SafeMath.div(timeLeft,gameDuration);
+            uint256 timeLeftFraction_inv = timeMulRatio - timeLeftFraction;
+            uint256 availableKeys = msg.value / oneDex + SafeMath.div(timeLeftFraction_inv,timeMulRatio)
+            */
+            EachPotValue[whichPot] += msg.value;
 
-    //         // insert temp address list of voters 
-    //         if( (VoteHistory[_rID][msg.sender][0]==0)&&
-    //             (VoteHistory[_rID][msg.sender][1]==0)&&
-    //             (VoteHistory[_rID][msg.sender][2]==0)
-    //           ){
-    //             tempVoterArr.push(msg.sender);
-    //         }
+            // insert temp address list of voters 
+            if( (VoteHistory[_rID][msg.sender][0]==0)&&
+                (VoteHistory[_rID][msg.sender][1]==0)&&
+                (VoteHistory[_rID][msg.sender][2]==0)
+              ){
+                tempVoterArr.push(msg.sender);
+            }
 
-    //         VoteHistory[_rID][msg.sender][whichPot] += msg.value;
-    //         // compare the lowest 
-    //         lowestPotIdx = compareLowest();
+            VoteHistory[_rID][msg.sender][whichPot] += msg.value;
+            // compare the lowest 
+            lowestPotIdx = compareLowest();
         
-    //         emit OnVoteToPot(whichPot,msg.sender,msg.value);
-    //     }
+            emit OnVoteToPot(whichPot,msg.sender,msg.value);
+        }
 
-    // }
+    }
 
-    // function compareLowest() private returns (uint){
-    //     int numSameValue = 0;
-    //     uint[] memory lowestPotIdxArr = new uint[](unmPots);
-    //     // find the lowest funded pot
-    //     uint256 lowestValue = 2**255;
+    function getPotValue(uint8 idx) public view returns (uint256) {
+        return EachPotValue[idx];
+    }
+
+    function getTgtAddrPotValue(uint8 idx,address addr) public view returns (uint256) {
+        return VoteHistory[rID_][addr][idx];
+    }
+
+    function getVotersList() public view returns (address[]) {
+        return tempVoterArr;
+    }
+
+    function compareLowest() private returns (uint){
+        int numSameValue = 0;
+        uint[] memory lowestPotIdxArr = new uint[](unmPots);
+        // find the lowest funded pot
+        uint256 lowestValue = 2**255;
         
-    //     lowestPotIdx = 4;
+        lowestPotIdx = 4;
 
-    //     for(uint8 k = 0;k < 3;k++){
-    //         if(EachPotValue[k]<=lowestValue){
-    //             lowestValue = EachPotValue[k];
-    //             lowestPotIdxArr[k] = k;
-    //             numSameValue++;
-    //         }
-    //     }
-    //     // if any of each pot has same amount
-    //     // Use Dexon's Rand choose one as final index
-    //     if(numSameValue>1){
-    //         //uint res = rand % lowestPotIdxArr.length;
-    //         //lowestPotIdx = lowestPotIdxArr[res]; 
-    //     }
-    //     else if (numSameValue == 1){
-    //         lowestPotIdx = lowestPotIdxArr[0];
-    //     }
-    //     else{
-    //         // something went wrong
-    //     }
-    //     return lowestPotIdx;
-    // }
+        for(uint8 k = 0;k < 3;k++){
+            if(EachPotValue[k]<=lowestValue){
+                lowestValue = EachPotValue[k];
+                lowestPotIdxArr[k] = k;
+                numSameValue++;
+            }
+        }
+        // if any of each pot has same amount
+        // Use Dexon's Rand choose one as final index
+        if(numSameValue>1){
+            uint res = rand % lowestPotIdxArr.length;
+            lowestPotIdx = lowestPotIdxArr[res]; 
+        }
+        else if (numSameValue == 1){
+            lowestPotIdx = lowestPotIdxArr[0];
+        }
+        else{
+            // something went wrong
+        }
+        return lowestPotIdx;
+    }
     
-    // function startElection() public payable {
-    //     require(!isVoting,"already started");
-    //     isVoting = true;
-    //     for(uint k = 0;k<3;k++)
-    //         EachPotValue[k] = 0;
-    // }
+    function startElection() public payable {
+        require(!isVoting,"already started");
+        isVoting = true;
+        for(uint k = 0;k<3;k++)
+            EachPotValue[k] = 0;
+        emit OnVoteStart(rID_);
+    }
 
-    // function endElection() public payable {        
-    //     isVoting = false;
+    function endElection() public payable {        
+        isVoting = false;
 
-    //     lowestPotIdx = compareLowest();
+        lowestPotIdx = compareLowest();
         
-    //     // pay our winners ,distribute rewards
-    //     distributeRewards();
+        // pay our winners ,distribute rewards
+        distributeRewards();
 
-    //     emit OnElected(rID_,lowestPotIdx);
+        emit OnElected(rID_,lowestPotIdx);
 
-    //     // start next round
-    //     rID_++;
-    //     round_[rID_].strt = now;
-    //     round_[rID_].end = now + (rndGap_);
+        // start next round
+        rID_++;
+        round_[rID_].strt = now;
+        round_[rID_].end = now + (rndGap_);
         
 
-    //     // Clear Data
-    //     delete EachPotValue;
-    //     delete tempVoterArr;
-    // }
+        // Clear Data
+        delete EachPotValue;
+        delete tempVoterArr;
+    }
 
-    // /**
-    //  * @dev returns time left.  dont spam this, you'll ddos yourself from your node 
-    //  * provider
-    //  * -functionhash- 0xc7e284b8
-    //  * @return time left in seconds
-    //  */
-    // function getTimeLeft()
-    //     public
-    //     view
-    //     returns(uint256)
-    // {
-    //     // setup local rID
-    //     uint256 _rID = rID_;
+    /**
+     * @dev returns time left.  dont spam this, you'll ddos yourself from your node 
+     * provider
+     * -functionhash- 0xc7e284b8
+     * @return time left in seconds
+     */
+    function getTimeLeft()
+        public
+        view
+        returns(uint256)
+    {
+        // setup local rID
+        uint256 _rID = rID_;
         
-    //     // grab time
-    //     uint256 _now = now;
+        // grab time
+        uint256 _now = now;
         
-    //     if (_now < round_[_rID].end)
-    //         if (_now > round_[_rID].strt + rndGap_)
-    //             return( (round_[_rID].end) - (_now) );
-    //         else
-    //             return( (round_[_rID].strt + rndGap_) - (_now) );
-    //     else
-    //         return(0);
-    // }
+        if (_now < round_[_rID].end)
+            if (_now > round_[_rID].strt + rndGap_)
+                return( (round_[_rID].end) - (_now) );
+            else
+                return( (round_[_rID].strt + rndGap_) - (_now) );
+        else
+            return(0);
+    }
 
-    // function distributeRewards() public payable {
-    //     // Total Dex , Dev Team Take 10%
-    //     uint256 totalMoney = EachPotValue[0]+EachPotValue[1]+EachPotValue[2];
-    //     uint256 devTeamShare = SafeMath.div(totalMoney,10);
-    //     uint256 rewards_remain = totalMoney - devTeamShare;
-    //     uint256 targetPot_value = EachPotValue[lowestPotIdx];
-    //     contractOwner.transfer(devTeamShare);
+    function distributeRewards() public payable {
+        // Total Dex , Dev Team Take 10%
+        uint256 totalMoney = EachPotValue[0]+EachPotValue[1]+EachPotValue[2];
+        uint256 devTeamShare = SafeMath.div(totalMoney,10);
+        uint256 rewards_remain = totalMoney - devTeamShare;
+        uint256 targetPot_value = EachPotValue[lowestPotIdx];
+        contractOwner.transfer(devTeamShare);
         
-    //     for(uint k = 0;k<tempVoterArr.length;k++)
-    //     {
-    //         address curAddr = tempVoterArr[k];
-    //         uint256 thisAddrVoteAmt = VoteHistory[rID_][curAddr][uint8(lowestPotIdx)];
-    //         uint256 voteFraction = SafeMath.percent(thisAddrVoteAmt,targetPot_value,3);
+        for(uint k = 0;k<tempVoterArr.length;k++)
+        {
+            address curAddr = tempVoterArr[k];
+            uint256 thisAddrVoteAmt = VoteHistory[rID_][curAddr][uint8(lowestPotIdx)];
+            uint256 voteFraction = SafeMath.percent(thisAddrVoteAmt,targetPot_value,3);
 
-    //         uint256 howMuchThisAddrGet = SafeMath.mul(rewards_remain,voteFraction);
-    //         howMuchThisAddrGet = SafeMath.div(howMuchThisAddrGet,1000);
-    //         curAddr.transfer(howMuchThisAddrGet);
-    //     }
-    // }
+            uint256 howMuchThisAddrGet = SafeMath.mul(rewards_remain,voteFraction);
+            howMuchThisAddrGet = SafeMath.div(howMuchThisAddrGet,1000);
+            curAddr.transfer(howMuchThisAddrGet);
+        }
+    }
 }
 
 

@@ -12,7 +12,7 @@
   "scripts": {
     "postinstall": "rm -rf node_modules/truffle/node_modules/solc && cp -r node_modules/solc node_modules/truffle/node_modules/; touch secret.js",
     "compile": "truffle compile",
-    "test": "truffle test",
+    "test": "truffle test --network development",
     "start:rpc": "node server-rpc.js"
   },
   "engines": {

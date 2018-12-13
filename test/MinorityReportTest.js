@@ -13,117 +13,44 @@ async function tryCatch(promise, reason) {
     assert.equal(isErrorOccur, true, `Expected to fail with ${reason}, but failed with: ${error.message}`);
   }
 };
+//function ([owner])
+contract('MinorityReport', (accounts)=> {
 
-contract('MinorityReport', () => {
-  let electionContract
-  before(async () => {
-    const election = await Election.deployed()
-    electionContract = new web3.eth.Contract(
-      election.abi,
-      election.address,
-    )
+  let election
+  beforeEach('setup contract for each test', async function () {
+      election = await Election.new(accounts[0])
   })
-  
-  it('init contract', async () => {
-    const activated = await electionContract.methods.activated_().call()
-    assert.equal(activated, false, "should be false right after init contract");
+
+  it('has an owner', async function () {
+      assert.equal(await election.contractOwner(), accounts[0])
   })
+
+  describe('[2]VotingProcess', () => {
+    it('--->activate', async () => {
+      const { logs } = await election.activate({ from: accounts[0] });
+      const evnt_OnVoteStart_idx = logs.findIndex(log => log.event === 'OnVoteStart');
+      // check round value is 1
+      assert.equal(logs[evnt_OnVoteStart_idx].args.round.toNumber(), 0);
+
+      const isVoting = await election.isVoting();
+      assert.equal(isVoting, true);
+   
+      //await election.activate({ from: accounts[0] });
+      const { votelogs } = await election.Vote(0, { from: accounts[0], value: 1e+18 });
+      const evnt_OnVoteToPot_idx = votelogs.findIndex(log => log.event === 'OnVoteToPot');
+
+      // see if vote 1 success 
+      const voter1_amt = await election.VoteHistory.call(1,accounts[0]);
+    });
+  });
+
+  // Test Get Function
+  describe('[2]getVotersList', () => {
+    it('get voter list', async () => {
+      const voterList = await election.getVotersList();
+      assert(voterList instanceof Array);
+    });
+  });
+
   
-  
-  // let election;
-
-  // beforeEach('setup contract for each test', async () => {
-  //   election = await Election.new();
-  // });
-
-  // describe('activate()', () => {
-  //   xit('should work correctly', async () => {
-  //     await election.activate();
-  //     const isVoting = await election.isVoting();
-  //     // assert.equal(isVoting, true);
-  //   });
-
-  //   // it('should revert if it is not called by owner', async () => {
-  //   //   tryCatch(election.activate({ from: accounts[1] }), 'Only owner is allowed');
-  //   // });
-  // });
-
-
-
-  // xdescribe('endElection()', () => {
-  //   it('should work correctly end game', async () => {
-  //     await election.endElection();
-      
-  //     const isVoting = await election.isVoting();
-  //     const totalVote = (await election.totalVote()).toNumber();
-  //     const candidateList = await election.getCandidatesList();
-
-  //     assert.equal(totalVote, 0);
-  //     assert.equal(isVoting, false);
-  //     assert.equal(candidateList.length, 0);
-  //   });
-
-  //   // it('should work correclty at first round', async () => {
-  //   //   // Bad smells(bad pratice) here. Please extract private functions to library to test it if you want to test those private functions.
-  //   //   const vote = (targetCandidate, voter = accounts[1]) => election.vote(targetCandidate, { from: voter });
-
-  //   //   await register('wayne', accounts[0]);
-  //   //   await register('wei chao', accounts[1]);
-  //   //   await register('william', accounts[2]);
-
-  //   //   await election.startVoting();
-
-  //   //   await vote(accounts[0], accounts[0]);
-  //   //   await vote(accounts[0], accounts[1]);
-  //   //   await vote(accounts[0], accounts[2]);
-  //   //   await vote(accounts[1], accounts[3]);
-  //   //   await vote(accounts[1], accounts[4]);
-  //   //   await vote(accounts[2], accounts[5]);
-
-  //   //   const { logs } = await election.resetElection();
-  //   //   const electedEventIndex = logs.findIndex(log => log.event === 'elected');
-  //   //   const refundEvents = logs.reduce((acc, log) => {
-  //   //     if (log.event === 'refund') {
-  //   //       acc.push(log);
-  //   //     }
-
-  //   //     return acc;
-  //   //   }, []);
-
-  //   //   const wayneRefundEvent = refundEvents.find(event => event.args.candidate === accounts[0]);
-  //   //   const weiChaoRefundEvent = refundEvents.find(event => event.args.candidate === accounts[1]);
-  //   //   const guaranteedDeposit = (await election.guaranteedDeposit()).toNumber();
-
-  //   //   const candidateList = await election.getCandidatesList();
-  //   //   const round = (await election.round()).toNumber();
-  //   //   const isVoting = await election.isVoting();
-  //   //   const totalVote = (await election.totalVote()).toNumber();
-
-  //   //   assert.equal(totalVote, 0);
-  //   //   assert.equal(round, 2);
-  //   //   assert.equal(isVoting, false);
-  //   //   assert.equal(candidateList.length, 0);
-
-  //   //   assert.equal(refundEvents.length, 2);
-  //   //   assert.equal(wayneRefundEvent.args.amount, guaranteedDeposit);
-  //   //   assert.equal(weiChaoRefundEvent.args.amount, guaranteedDeposit);
-  //   //   assert.equal(logs[electedEventIndex].args.round.toNumber(), 1);
-  //   //   assert.equal(logs[electedEventIndex].args.candidate, accounts[0]);
-  //   //   assert.equal(logs[electedEventIndex].args.name, 'wayne');
-  //   //   assert.equal(logs[electedEventIndex].args.vote.toNumber(), 3);
-  //   // });
-
-  //   // it('should revert if it is not called by owner', async () => {
-  //   //   tryCatch(election.resetElection({ from: accounts[1] }), 'Only owner is allowed');
-  //   // });
-  // });
-  // /*
-  // describe('getCandidatesList()', () => {
-  //   it('should return list correctly', async () => {
-  //     const candidateList = await election.getCandidatesList();
-
-  //     assert(candidateList instanceof Array);
-  //   });
-  // });
-  // */
 });
