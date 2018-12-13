@@ -12,6 +12,8 @@ then pull the repo :
 
 npm install.
 
--- test and compile
+-- test and compile :
+
 truffle-dexon compile
+
 truffle-dexon migrate
