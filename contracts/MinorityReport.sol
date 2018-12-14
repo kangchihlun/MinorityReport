@@ -98,13 +98,10 @@ contract MinorityReport {
     // //==================================
     event OnVoteStart(uint round);
     event OnElected(uint round,uint whichPot);
-    event OnVoteToPot(uint8 whichPot,address whoVoted,uint256 value);
+    event OnVoteToPot(uint whichPot,address whoVoted,uint256 value);
     event OnMinorityPotID_Changed(uint8 whichPot,uint256 amount);
 
-    // constructor () public{
-    //     require(msg.sender != address(0),"owner created");
-    //     contractOwner = msg.sender;
-    // }
+
     constructor (address _addr) public{
         require(_addr != address(0),"owner created");
         contractOwner = _addr;
@@ -143,12 +140,11 @@ contract MinorityReport {
     /**
      *     Core Function
      */
-    function Vote(uint8 whichPot)
+    function Vote(uint whichPot)
         public
         isWithinLimits(msg.value)
         payable
     {
-        //require(uIdWallet_[wallet]!=0,"Register First !");
         require(activated_,"not activated ");
         require(isVoting,"vote phase not even started");
         require(whichPot < unmPots && whichPot >= 0 ,"wrong pot index" ); 
@@ -190,10 +186,8 @@ contract MinorityReport {
             VoteHistory[_rID][msg.sender][whichPot] += msg.value;
             // compare the lowest 
             lowestPotIdx = compareLowest();
-        
-            emit OnVoteToPot(whichPot,msg.sender,msg.value);
         }
-
+        emit OnVoteToPot(whichPot,msg.sender,msg.value);
     }
 
     function getPotValue(uint8 idx) public view returns (uint256) {
@@ -208,7 +202,7 @@ contract MinorityReport {
         return tempVoterArr;
     }
 
-    function compareLowest() private returns (uint){
+    function compareLowest() public returns (uint){
         int numSameValue = 0;
         uint[] memory lowestPotIdxArr = new uint[](unmPots);
         // find the lowest funded pot
@@ -226,8 +220,8 @@ contract MinorityReport {
         // if any of each pot has same amount
         // Use Dexon's Rand choose one as final index
         if(numSameValue>1){
-            uint res = rand % lowestPotIdxArr.length;
-            lowestPotIdx = lowestPotIdxArr[res]; 
+            // uint res = rand % lowestPotIdxArr.length;
+            // lowestPotIdx = lowestPotIdxArr[res]; 
         }
         else if (numSameValue == 1){
             lowestPotIdx = lowestPotIdxArr[0];
@@ -256,15 +250,15 @@ contract MinorityReport {
 
         emit OnElected(rID_,lowestPotIdx);
 
+        // Clear Data
+        delete EachPotValue;
+        delete tempVoterArr;
+
         // start next round
         rID_++;
         round_[rID_].strt = now;
         round_[rID_].end = now + (rndGap_);
-        
-
-        // Clear Data
-        delete EachPotValue;
-        delete tempVoterArr;
+        startElection();
     }
 
     /**
