@@ -20,15 +20,16 @@ module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
   // to customize your Truffle configuration!
   networks: {
-    development: {
-     host: 'localhost',
-     port: 8545,
-     network_id: '*' // Match any network id
-    },
     testnet: {
       provider: new HDWalletProvider(mnemonic,
-        "http://testnet.dexon.org:8545"),
+        "http://testnet.dexon.org:8545", 0, 1, true, "m/44'/237'/0'/0/"),
       network_id: "*"
+    },
+    development: {
+      network_id: '*',
+      host: "localhost",
+      port: 8545,
+      gas: 4712388
     }
   }
 };
