@@ -6,18 +6,20 @@ import styled from 'styled-components'
 import {
   H1,
   H2,
+  H3,
+  P,
 } from '../components/Text'
 import Loader from '../components/Loader'
 import {
   GET_WALLET_INFO,
-  GET_REGISTRATION_FEE,
+  GET_PLACEHOLDER_INFO,
 } from '../lib/queries'
 import Layout from '../components/Layout'
 import withPolling from '../lib/withPolling'
 
 const Container = styled.div`
   width: 100vw;
-  height: 100vh;
+  height: auto;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -29,46 +31,88 @@ const Spacer = styled.div`
   height: 100px;
 `
 
+const BoxContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+`
+
+const Box = styled.div`
+  padding: 10px 20px 20px 20px;
+  width: 750px;
+  border: 1px solid white;
+  margin-bottom: 10px;
+`
+
 const ContractPage = ({ walletAddress }) => (
   <Layout>
     <Container>
+      <Spacer />
       <Query
         query={GET_WALLET_INFO}
         variables={{ address: walletAddress }}
         skip={!walletAddress}
       >
         {({ loading, error, data }) => {
+          if (!walletAddress) return null
           if (loading || !data || !data.wallet) return <Loader />
           if (error) return `Error! ${error.message}`
           const { wallet } = data
           return (
-            <React.Fragment>
-              <H2>{wallet.address}</H2>
-              <H1>{wallet.balance}</H1>
-            </React.Fragment>
+            <BoxContainer>
+              <Box>
+                <H1>Current Active Account</H1>
+                <H3>Address</H3>
+                <P>{wallet.address}</P>
+                <H3>Balance</H3>
+                <P>{wallet.balance}</P>
+              </Box>
+            </BoxContainer>
           )
         }}
       </Query>
       <Spacer />
       <Query
-        query={GET_REGISTRATION_FEE}
+        query={GET_PLACEHOLDER_INFO}
       >
         {({ loading, error, data }) => {
-          if (loading || !data || !data.userInformation) return <Loader />
+          if (loading || !data || !data.dexon) return <Loader />
           if (error) return `Error! ${error.message}`
           const {
-            userInformation: {
-              registrationFee,
-            },
+            dexon,
+            devWallets,
           } = data
           return (
             <React.Fragment>
-              <H1>
-                registrationFee:
-              </H1>
-              <H2>
-                {registrationFee}
-              </H2>
+              <BoxContainer>
+                <Box>
+                  <H1>
+                    dexon rand
+                  </H1>
+                  <H2>
+                    {dexon.rand}
+                  </H2>
+                </Box>
+              </BoxContainer>
+              <Spacer />
+              <BoxContainer>
+                {devWallets.map((devWallet, index) => (
+                  <Box key={devWallet.address}>
+                    <H1>
+                      Dev Wallet Account
+                      {' '}
+                      {index + 1}
+                    </H1>
+                    <H3>Address</H3>
+                    <P>{devWallet.address}</P>
+                    <H3>PrivateKey</H3>
+                    <P>{devWallet.privateKey}</P>
+                    <H3>Balance</H3>
+                    <P>{devWallet.balance}</P>
+                  </Box>
+                ))}
+              </BoxContainer>
             </React.Fragment>
           )
         }}

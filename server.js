@@ -3,7 +3,7 @@ const graphqlHTTP = require('express-graphql')
 const bodyParser = require('body-parser')
 const next = require('next')
 const MyGraphQLSchema = require('./lib/schema')
-const accounts = require('./build/accounts.json')
+// const accounts = require('./build/accounts.json')
 
 const dev = process.env.NODE_ENV !== 'production'
 const app = next({ dev })
@@ -20,7 +20,7 @@ app.prepare().then(async () => {
   server.use('/graphql', graphqlHTTP({
     schema: MyGraphQLSchema,
     graphiql: true,
-    context: { accounts },
+    // context: { accounts },
     extensions,
   }))
   server.get('/game/:id', (req, res) => {

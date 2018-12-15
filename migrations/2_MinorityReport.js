@@ -6,3 +6,6 @@ module.exports = function (deployer, network, accounts) {
         return deployer.deploy(Minor,accounts[0]);
     });
 };
+
+const HelloDexonRand = artifacts.require('./HelloDexonRand.sol')
+module.exports = deployer => deployer.deploy(HelloDexonRand);

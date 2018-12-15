@@ -23,7 +23,8 @@ module.exports = {
     testnet: {
       provider: new HDWalletProvider(mnemonic,
         "http://testnet.dexon.org:8545", 0, 1, true, "m/44'/237'/0'/0/"),
-      network_id: "*"
+      network_id: "*",
+      //from: second account address
     },
     development: {
       network_id: '*',
