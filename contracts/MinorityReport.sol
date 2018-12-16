@@ -220,8 +220,8 @@ contract MinorityReport {
         // if any of each pot has same amount
         // Use Dexon's Rand choose one as final index
         if(numSameValue>1){
-            uint res = rand % lowestPotIdxArr.length;
-            lowestPotIdx = lowestPotIdxArr[res]; 
+            //uint res = rand % lowestPotIdxArr.length;
+            //lowestPotIdx = lowestPotIdxArr[res]; 
         }
         else if (numSameValue == 1){
             lowestPotIdx = lowestPotIdxArr[0];
