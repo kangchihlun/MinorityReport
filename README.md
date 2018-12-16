@@ -2,7 +2,7 @@
 A Voting dApp Game : Only The Minority Can Win.
 Template from CHAOWEICHIU/dapp-starter-kit , thanks Wayne !
 
-# Build and Installation
+# Installation and migrate
 I use rand keyword which is platform specific.
 install dexon truffle first :
 
@@ -17,3 +17,10 @@ npm install.
 truffle-dexon compile
 
 truffle-dexon migrate
+
+# run
+yarn run dev
+
+
+# Presentation
+https://hackmd.io/p/HyzBfd8Ke#/
