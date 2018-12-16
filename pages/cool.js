@@ -234,8 +234,8 @@ const Team = ({ src, teamName, winner, currentAmount, ...rest }) => (
     }
     
     fn_refreshPotValue = ()=>{
-      this.mContract.methods.getPotValue(0).call().then(
-        ret_s => {
+      // this.mContract.methods.getPotValue(0).call().then(
+      //   ret_s => {
           //console.log(ret_s)
           // this.setState({ sun_pot_value: ret_s })
           // this.mContract.methods.getPotValue(1).call().then(
@@ -247,7 +247,7 @@ const Team = ({ src, teamName, winner, currentAmount, ...rest }) => (
                   
           //     })
           // })
-      });
+      // });
     }
 
     componentDidMount() {
@@ -283,7 +283,7 @@ const Team = ({ src, teamName, winner, currentAmount, ...rest }) => (
         gas:210000
       }).then(
         ret=>{
-          this.fn_refreshPotValue()
+          //this.fn_refreshPotValue()
         }
       )
       // myContract.methods.myMethod(123).send({
@@ -296,10 +296,11 @@ const Team = ({ src, teamName, winner, currentAmount, ...rest }) => (
       //console.log(this.state.mContract.methods)
       console.log('Earth Clicked')
       this.mContract.methods.Vote(1).send({
-        from:this.state.activeAccount,value: 1e+16
+        from:this.state.activeAccount,value: 1e+16,
+        gas:210000
       }).then(
         ret=>{
-          this.fn_refreshPotValue()
+          //this.fn_refreshPotValue()
         }
       )
     }
@@ -308,10 +309,11 @@ const Team = ({ src, teamName, winner, currentAmount, ...rest }) => (
       //console.log(this.state.mContract.methods)
       console.log('Moon Clicked')
       this.mContract.methods.Vote(2).send({
-        from:this.state.activeAccount,value: 1e+16
+        from:this.state.activeAccount,value: 1e+16,
+        gas:210000
       }).then(
         ret=>{
-          this.fn_refreshPotValue()
+          //this.fn_refreshPotValue()
         }
       )
     }
