@@ -14,9 +14,9 @@ npm install.
 
 -- test and compile :
 
-truffle-dexon compile
+dexon-truffle compile
 
-truffle-dexon migrate
+dexon-truffle migrate --reset --network=testnet
 
 # run
 yarn run dev
